@@ -13,5 +13,47 @@
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <!-- https://developers.google.com/apps-script/guides/support/troubleshooting#authorization-is -->
+  <p>Do you want to "href=url" to add image to sheet?
+    <ion-button href="https://script.google.com/macros/s/AKfycbw527Wo_KkHKugGphS8ahtSP0sKrgDweaVnn0WX9oQOGqXWQEmH00H3TJQ5yur_0Q-Y7Q/exec">
+      <!-- We are still using Ionic v4.11.13 -->
+      <ion-icon name="image"></ion-icon>
+      <ion-label>Add image</ion-label>
+    </ion-button>
+  </p>
+
+  <h1>Angular HttpClient</h1>
+
+  <p>Add image via 'getGScript()'
+    <ion-button (click)="getGScript()">
+      <ion-icon name="image"></ion-icon>
+      <ion-label>Add image</ion-label>
+    </ion-button>
+  </p>
+
+  <h1>JS fetch() + Promise cascade</h1>
+
+  <ion-list>
+    <ion-label>Add image to sheet via JS fetch(method: "POST", ) in 'sendFilenameToGScript()'</ion-label>
+    <ion-item>
+      <ion-label>Filename</ion-label>
+      <ion-select placeholder="Select One" [(ngModel)]="filename">
+        <ion-select-option *ngFor="let filename of fileList;" [value]="filename">
+          <!-- https://angular.dev/guide/templates/binding#render-dynamic-text-with-text-interpolation, 
+            "You can bind dynamic text in templates with double curly braces, which tells Angular that it is responsible for the 
+            expression inside and ensuring it is updated correctly. This is called text interpolation." 
+            -->
+            {{filename}}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+  
+  <p class="center">
+    <ion-button (click)="sendFilenameToGScript()">
+      <ion-icon name="image"></ion-icon>
+      <ion-label >Add image</ion-label>
+    </ion-button>
+  </p>
+
 </ion-content>
