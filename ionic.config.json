@@ -1,0 +1,7 @@
+{
+  "name": "camera-gapp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
