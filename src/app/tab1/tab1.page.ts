@@ -10,7 +10,11 @@ import { Observable } from 'rxjs';
   styleUrls: ['tab1.page.scss']
 })
 export class Tab1Page {
-  private url = 'https://script.google.com/macros/s/AKfycbz27qeaStZLyLEa5tXeVzFuQvFXgZLPi0XBVgM_H-W8K4L8gTm0-0sPQBeVG5Nda9MAgw/exec';
+
+  // -------------------------------------------------------
+  // *** NOTE: REMOVE ACTIVE URL BEFORE ADDING TO GITHUB ***
+  // -------------------------------------------------------
+  private url = '';
 
   private initStr = 'Hey, sweeet...';
   items = [
@@ -106,6 +110,10 @@ export class Tab1Page {
     
   }
 
+  // ---------------
+  // HttpClient Get
+  // ---------------
+
   // 25/9/24 DH: Recreating 'gsheet.js' + 'Node.js::googleapis'
   getDetails(sheetName: string) {
     let retVal: Observable<any>;
@@ -142,6 +150,10 @@ export class Tab1Page {
     this.sheetName = "Deleted";
     this.getDetails('Deleted');
   }
+
+  // ----------------
+  // HttpClient Post
+  // ----------------
 
   // 28/9/24 DH: https://v17.angular.io/guide/http-send-data-to-server
   sendPost(action: string, sheetName: string, value: string) {

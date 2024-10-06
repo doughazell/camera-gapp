@@ -53,8 +53,11 @@ export class PhotoService {
     // Easiest way to detect when running on the web:
     // “when the platform is NOT hybrid, do this”
     if (!this.platform.is('hybrid')) {
+      
+
       // Display the photo by reading into base64 format
       for (let photo of this.photos) {
+        
         // Read each saved photo's data from the Filesystem
         const readFile = await Filesystem.readFile({
             path: photo.filepath,
@@ -63,6 +66,7 @@ export class PhotoService {
 
         // Web platform only: Load the photo as base64 data
         photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+        
       }
     }
   }
@@ -73,6 +77,7 @@ export class PhotoService {
 
     // Write the file to the data directory
     const fileName = Date.now() + '.jpeg';
+    // 1/10/24 DH: https://capacitorjs.com/docs/apis/filesystem#writefileoptions
     const savedFile = await Filesystem.writeFile({
       path: fileName,
       data: base64Data,
