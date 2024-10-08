@@ -7,6 +7,9 @@ import { Preferences } from '@capacitor/preferences';
 import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 
+// 7/10/24 DH:
+import { AppscriptService } from './appscript.service';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,13 +18,14 @@ export class PhotoService {
   private PHOTO_STORAGE: string = 'photos';
   private platform: Platform;
 
-  constructor(platform: Platform) { 
+  constructor(platform: Platform, public appscriptService: AppscriptService) { 
     this.platform = platform;
   }
 
   // 19/8/24 DH: and we're back in Ionic/Angular land...:)
   public async addNewToGallery() {
     // Take a photo
+    // https://capacitorjs.com/docs/apis/camera#getphoto
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
       source: CameraSource.Camera,
@@ -37,6 +41,37 @@ export class PhotoService {
 
     // Save the picture and add it to photo collection
     const savedImageFile = await this.savePicture(capturedPhoto);
+    this.photos.unshift(savedImageFile);
+
+    console.log("savedImageFile.filepath: ", savedImageFile.filepath);
+    console.log("savedImageFile.webviewPath: ", savedImageFile.webviewPath);
+
+    Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+
+    // 7/10/24 DH:
+    return capturedPhoto;
+    
+  }
+
+  // 8/10/24 DH:
+  public async getPhoto() {
+    // Take a photo
+    const capturedPhoto = await Camera.getPhoto({
+      resultType: CameraResultType.Uri,
+      source: CameraSource.Camera,
+      quality: 100
+    });
+
+    return capturedPhoto;
+  }
+
+  // 8/10/24 DH:
+  public async savePhoto(photo: Photo) {
+    // Save the picture and add it to photo collection
+    const savedImageFile = await this.savePicture(photo);
     this.photos.unshift(savedImageFile);
 
     Preferences.set({

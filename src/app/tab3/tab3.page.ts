@@ -7,6 +7,9 @@ import { Observable } from 'rxjs';
 // 4/10/24 DH:
 import { EmailComposer } from 'capacitor-email-composer';
 
+// 7/10/24 DH:
+import { AppscriptService } from '../services/appscript.service';
+
 @Component({
   selector: 'app-tab3',
   templateUrl: 'tab3.page.html',
@@ -34,7 +37,7 @@ export class Tab3Page {
     'Rick&Morty-robotVsVideogame.png'
   ];
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private appscriptService: AppscriptService) {
     this.filename = "TBD";
   }
 
@@ -50,7 +53,8 @@ export class Tab3Page {
 
     console.log("Calling 'this.http.get()'");
     
-    retVal = this.http.get(this.url, {responseType: 'text'});
+    //retVal = this.http.get(this.url, {responseType: 'text'});
+    retVal = this.http.get(this.appscriptService.url, {responseType: 'text'});
 
     // 18/9/24 DH: Without 'retVal.subscribe(...)' then IMAGE NOT ADDED to Google Sheet...wtf???
     retVal.subscribe((response) => {
@@ -103,7 +107,8 @@ export class Tab3Page {
     console.log("Calling 'this.http.post()'");
     
     // 28/9/24 DH: (14:30) Get CORS error without sending data arg (prob a "port scan" defence)
-    retVal = this.http.post(this.url, formData, {params: params, responseType: 'text'});
+    //retVal = this.http.post(this.url, formData, {params: params, responseType: 'text'});
+    retVal = this.http.post(this.appscriptService.url, formData, {params: params, responseType: 'text'});
 
     // 18/9/24 DH: Without 'retVal.subscribe(...)' then NOT WORK
     retVal.subscribe((response) => {
@@ -119,7 +124,7 @@ export class Tab3Page {
   // -------------
 
   sendFilenameToGScript() {
-    fetch(this.url, { method: "POST", body: this.filename })
+    fetch(this.appscriptService.url, { method: "POST", body: this.filename })
       .then((res) => {
         console.log("1st Promise: " + res.status);
         return res.text(); // Promise necessary since Response stream read to eof

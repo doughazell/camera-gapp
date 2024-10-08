@@ -24,8 +24,29 @@
   </ion-grid>
 
   <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-    <ion-fab-button (click)="addPhotoToGallery()">
-      <ion-icon name="camera"></ion-icon>
-    </ion-fab-button>
+
+    <ion-row>
+      
+      <ion-col size="4">
+        <!-- https://ionic.io/ionicons -->
+        <ion-fab-button (click)="addPhotoToGallery()">
+          <ion-icon name="camera"></ion-icon>
+        </ion-fab-button>
+      </ion-col>
+
+      <ion-col size="4">
+        <ion-fab-button (click)="sendPhotoToGoogleWorkspace()">
+          <ion-icon name="document-attach"></ion-icon>
+        </ion-fab-button>
+      </ion-col>
+
+      <ion-col size="4">
+        <ion-fab-button (click)="sharePhotoToGoogle()">
+          <ion-icon name="share-social-outline"></ion-icon>
+        </ion-fab-button>
+      </ion-col>
+
+    </ion-row>
+
   </ion-fab>
 </ion-content>
