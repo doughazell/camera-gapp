@@ -4,17 +4,15 @@ import { Component } from '@angular/core';
 import { HttpClient, HttpParams} from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+// 8/10/24 DH:
+import { AppscriptService } from '../services/appscript.service';
+
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
   styleUrls: ['tab1.page.scss']
 })
 export class Tab1Page {
-
-  // -------------------------------------------------------
-  // *** NOTE: REMOVE ACTIVE URL BEFORE ADDING TO GITHUB ***
-  // -------------------------------------------------------
-  private url = '';
 
   private initStr = 'Hey, sweeet...';
   items = [
@@ -31,7 +29,7 @@ export class Tab1Page {
   // 28/9/24 DH: Needed for https://angular.dev/guide/templates/binding#render-dynamic-text-with-text-interpolation
   sheetName = "TBD";
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private appscriptService: AppscriptService) {
     this.dtg = new Date();
   }
 
@@ -128,7 +126,7 @@ export class Tab1Page {
     // Need to restart whilst waiting for Apps Script to response
     this.dtg = new Date();
 
-    retVal = this.http.get(this.url, {responseType: 'text', params: params});
+    retVal = this.http.get(this.appscriptService.url1, {responseType: 'text', params: params});
 
     // 18/9/24 DH: Without 'retVal.subscribe(...)' then NOT WORK
     /* */
@@ -167,7 +165,7 @@ export class Tab1Page {
     console.log("Calling 'this.http.post()'");
     
     // 28/9/24 DH: (14:30) Get CORS error without sending data arg (prob a "port scan" defence)
-    retVal = this.http.post(this.url, params, {responseType: 'text'});
+    retVal = this.http.post(this.appscriptService.url1, params, {responseType: 'text'});
 
     // 18/9/24 DH: Without 'retVal.subscribe(...)' then NOT WORK
     retVal.subscribe((response) => {

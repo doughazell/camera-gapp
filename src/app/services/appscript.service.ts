@@ -17,7 +17,9 @@ export class AppscriptService {
   // -------------------------------------------------------
   // *** NOTE: REMOVE ACTIVE URL BEFORE ADDING TO GITHUB ***
   // -------------------------------------------------------
-  public url = '';
+  public url1 = '';
+
+  public url2 = '';
 
   constructor(private http: HttpClient) { }
 
@@ -45,7 +47,7 @@ export class AppscriptService {
         //path: '/' + imgName // starting slash is important for Angular
 
         type: 'absolute',
-        path: 'storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20241007_163304_5492866496822435281.jpg'
+        path: 'storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20241008_003938_6658997140349880642.jpg'
       }]
     }).then((response) => {
       console.log('Email Response: ', response);
@@ -56,8 +58,14 @@ export class AppscriptService {
 
   }
 
+  // 9/10/24 DH:
+  sendSharedFilename(imgName: string) {
+    let formData: FormData = new FormData();
+    this.postGScript("addSharedImg", "Copy of KIT", imgName, formData);
+  }
+
    // 7/10/24 DH:
-   postGScript(action: string, sheetName: string, value: string, formData: FormData) {
+  postGScript(action: string, sheetName: string, value: string, formData: FormData) {
     let retVal: Observable<any>;
     // 28/9/24 DH: https://v17.angular.io/guide/http-send-data-to-server
     let params = new HttpParams();
@@ -69,7 +77,7 @@ export class AppscriptService {
     console.log("Calling 'this.http.post()'");
     
     // 28/9/24 DH: (14:30) Get CORS error without sending data arg (prob a "port scan" defence)
-    retVal = this.http.post(this.url, formData, {params: params, responseType: 'text'});
+    retVal = this.http.post(this.url2, formData, {params: params, responseType: 'text'});
 
     // 18/9/24 DH: Without 'retVal.subscribe(...)' then NOT WORK
     retVal.subscribe((response) => {

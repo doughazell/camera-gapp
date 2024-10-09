@@ -35,30 +35,44 @@ export class Tab2Page {
       let photoPath = "TBD";
       if (capturedPhoto.path) {
         photoPath = capturedPhoto.path;
+
+        this.photoService.appscriptService.emailImg(photoPath);
       }
 
-      this.photoService.appscriptService.emailImg(photoPath);
     });
     
   }
 
   // 7/10/24 DH:
   sharePhotoToGoogle() {
-    
-    //this.photoService.addNewToGallery()
-    this.photoService.getPhoto()
 
+    this.photoService.getPhoto()
     .then((capturedPhoto) => {
       if(capturedPhoto.path) {
+        
         let pathSplit = capturedPhoto.path.split("/");
-        let imgName = pathSplit.slice(-1)[0];
+        let tempImgName = pathSplit.slice(-1)[0];
 
+        let tempNameSplit = tempImgName.split("_");
+        let imgName = tempNameSplit[1] + "_" + tempNameSplit[2] + ".jpg";
+
+        // capturedPhoto: file:///storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20241009_202633_8318761589904655285.jpg
+        // imgName:       JPEG_20241009_202633_8318761589904655285.jpg
+        console.log("capturedPhoto: ", capturedPhoto.path);
+        console.log("tempImgName: ", tempImgName);
+        console.log("imgName: ", imgName);
+
+        // https://capacitorjs.com/docs/apis/share#shareoptions
         Share.share({
           url: capturedPhoto.path,
           title: imgName
         });
 
         this.photoService.savePhoto(capturedPhoto);
+
+        // 9/10/24 DH:
+        this.photoService.appscriptService.sendSharedFilename(imgName);
+
       }
       
     });

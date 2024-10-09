@@ -21,11 +21,6 @@ import { AppscriptService } from '../services/appscript.service';
 //@Injectable({providedIn: 'root'})
 export class Tab3Page {
 
-  // -------------------------------------------------------
-  // *** NOTE: REMOVE ACTIVE URL BEFORE ADDING TO GITHUB ***
-  // -------------------------------------------------------
-  private url = '';
-
   filename: string;
 
   // 8/5/22 DH: Ideally this should be read from the google sheet for DB normalisation (legacy comment from 'selection.component.ts')
@@ -54,7 +49,7 @@ export class Tab3Page {
     console.log("Calling 'this.http.get()'");
     
     //retVal = this.http.get(this.url, {responseType: 'text'});
-    retVal = this.http.get(this.appscriptService.url, {responseType: 'text'});
+    retVal = this.http.get(this.appscriptService.url2, {responseType: 'text'});
 
     // 18/9/24 DH: Without 'retVal.subscribe(...)' then IMAGE NOT ADDED to Google Sheet...wtf???
     retVal.subscribe((response) => {
@@ -84,6 +79,9 @@ export class Tab3Page {
     // https://developer.mozilla.org/en-US/docs/Web/API/FormData
     let formData: FormData = new FormData();
 
+    // 9/10/24 DH: 'http.get()' IS ONLY to get image from 'assets' (during Android 'fs' "working-model-up"...)
+    //             THEN 
+    //             'http.post('addImg', 'balavil-sunset.jpg', blob)'
     this.http.get('assets/'+imgName, {responseType: 'blob'})
     .subscribe(blob => {
 
@@ -108,7 +106,7 @@ export class Tab3Page {
     
     // 28/9/24 DH: (14:30) Get CORS error without sending data arg (prob a "port scan" defence)
     //retVal = this.http.post(this.url, formData, {params: params, responseType: 'text'});
-    retVal = this.http.post(this.appscriptService.url, formData, {params: params, responseType: 'text'});
+    retVal = this.http.post(this.appscriptService.url2, formData, {params: params, responseType: 'text'});
 
     // 18/9/24 DH: Without 'retVal.subscribe(...)' then NOT WORK
     retVal.subscribe((response) => {
@@ -124,7 +122,7 @@ export class Tab3Page {
   // -------------
 
   sendFilenameToGScript() {
-    fetch(this.appscriptService.url, { method: "POST", body: this.filename })
+    fetch(this.appscriptService.url2, { method: "POST", body: this.filename })
       .then((res) => {
         console.log("1st Promise: " + res.status);
         return res.text(); // Promise necessary since Response stream read to eof
