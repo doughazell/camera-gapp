@@ -120,11 +120,16 @@ function insertImage(sheet, row, col, imgFile, titleVal) {
       var imgType = "ImgApp";
     } catch(error) {
       if(error.toString().indexOf("imgFile.getBlob is not a function") > -1) {
+        // 14/10/24 DH: This is probably just "placeholder" code for non-ImgApp blobs
         var imgSize = imgFile.getSize();
         var imgType = "Attachment";
       }
     }
     
+    // 14/10/24 DH: Bizarrely GMail Attachment 'getSize()' DOES NOT HAVE 'width'
+    //              ...so HOW does this NOT create an ERROR...???
+    //              (Is 'imgType' ever "Attachment" ?)
+    // https://developers.google.com/apps-script/reference/gmail/gmail-attachment
     if (imgSize.width > desiredWidth) {
       let resImg = ImgApp.doResize(imgFile.getId(), desiredWidth);
       sheet.insertImage(resImg.blob, col, row);

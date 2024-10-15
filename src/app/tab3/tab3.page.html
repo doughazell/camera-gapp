@@ -14,9 +14,8 @@
   </ion-header>
 
   <!-- https://developers.google.com/apps-script/guides/support/troubleshooting#authorization-is -->
-  <p>Do you want to "href=url" to add image to sheet?
-    <ion-button href="https://script.google.com/macros/s/AKfycbw527Wo_KkHKugGphS8ahtSP0sKrgDweaVnn0WX9oQOGqXWQEmH00H3TJQ5yur_0Q-Y7Q/exec">
-      <!-- We are still using Ionic v4.11.13 -->
+  <p>Send image filename "{{gdriveImg}}" via Get
+    <ion-button href="?value={{gdriveImg}}">
       <ion-icon name="image"></ion-icon>
       <ion-label>Add image</ion-label>
     </ion-button>
@@ -31,6 +30,7 @@
     </ion-button>
   </p>
 
+  <!--
   <h4 style="text-align: center; text-decoration: underline;">Call 'emailImg()'</h4>
   <p class="center">
     <ion-button (click)="emailImg()">
@@ -38,6 +38,29 @@
       <ion-label>Add image</ion-label>
     </ion-button>
   </p>
+  -->
+  <h4 style="text-align: center; text-decoration: underline;">Get "{{gdriveImg}}" img</h4>
+  <p class="center">
+    <ion-button (click)="getGDriveImg()">
+      <ion-icon name="image"></ion-icon>
+      <ion-label>Add image</ion-label>
+    </ion-button>
+    <br>
+
+    <!-- DOES NOT SCALE WITH BASE64 IMG SIZE
+    <ion-img [src]="imgBase64Src"></ion-img>
+    -->
+
+    {{dtg1}}
+    <br>
+    {{dtg2}}
+    <br>
+    <!-- <img [src]="imgBase64Src"> does the same thing -->
+    <img src={{imgBase64Src}}>
+
+  </p>
+
+  <!-- <div [innerHTML]="gdriveImg"></div> -->
 
   <h1>JS fetch() + Promise cascade</h1>
 

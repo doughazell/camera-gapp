@@ -1,9 +1,21 @@
 // "Execute as": Me (doughazell@googlemail.com)
 // "Who has access": Anyone
 
-function doGet(e) {
+// 1/10/24 DH:
+var gSheetID = '11tdSmNDpvY1ATQLZvHXmJ2yi_44a94EwzUmTUUkRg1s';
+
+// 1/10/24 DH: Taken from 'SheetsAPI-Personal'
+function initLog() {
+  // https://developers.google.com/apps-script/reference/utilities/utilities#formatDate(Date,String,String)
+  let time = Utilities.formatDate(new Date(), "GMT+1", "HH:mm:ss");
   
-  let params = JSON.stringify(e);
+  let logFilename = Utilities.formatDate(new Date(), "GMT+1", "dMMMyyyy");
+  let logDoc = getLogfile(time, logFilename);
+}
+
+function doGet(passedParams) {
+  
+  let params = JSON.stringify(passedParams);
   
   let imageUrl = 'https://www.google.com/images/srpr/logo3w.png';
   let sheetID = '11tdSmNDpvY1ATQLZvHXmJ2yi_44a94EwzUmTUUkRg1s';
@@ -12,63 +24,86 @@ function doGet(e) {
   let row = 10;
 
   try {
+
+    initLog();
+
+    /*
     SpreadsheetApp.openById(sheetID).getSheetByName(sheetName).insertImage(imageUrl,col,row);
 
     // 17/5/22 DH: CORS header error without using 'ContentService.createTextOutput()'
     return ContentService.createTextOutput('insertImage() worked fine...17Sep24');
       //.setMimeType(ContentService.MimeType.JAVASCRIPT);
-      //.setMimeType(ContentService.MimeType.JSON) 
-  } catch(e) {
-    //return HtmlService.createHtmlOutput(e);
-    return ContentService.createTextOutput('insertImage() FAILED - 17Sep24');
+      //.setMimeType(ContentService.MimeType.JSON);
+     */
+
+    //logMsg(params);
+
+    // 13/10/24 DH:
+    // Set global for 'getDriveImg()' in 'images.html'
+    let value = passedParams.parameter.value;
+
+    // https://developers.google.com/apps-script/guides/html
+    // https://developers.google.com/apps-script/reference/html/html-service
+    //return HtmlService.createHtmlOutputFromFile('images');
+
+    // https://developers.google.com/apps-script/reference/html/html-template?hl=en#evaluate()
+    // https://developers.google.com/apps-script/guides/html/templates?hl=en#pushing_variables_to_templates
+    var servTemplate = HtmlService.createTemplateFromFile('images');
+    
+    // 14/10/24 DH: Pass variables into template
+    servTemplate.imgName = value;
+    
+    return servTemplate.evaluate();
+
+  } catch(error) {
+    //return HtmlService.createHtmlOutput(error);
+    return ContentService.createTextOutput('insertImage() FAILED - 17Sep24 ' + error);
   }
   
 }
-
+// 22/9/24 DH: Refactored
+// 1/10/24 DH: Refactored (like 'SheetsAPI-Personal::doPost(...)::doAction(...)' )
 function doPost(passedParams){
-  
-  let imageUrl = 'https://www.google.com/images/srpr/logo3w.png';
-
-  // 19/9/24 DH: Despite being public accessible it CAN NOT BE ACCESSED via GApps
-  // "Exception: Error retrieving image from URL or bad URL: https://drive.google.com/file/d/1AUo9rUuTRxMB89j_WJX86-83O5osx-kc/view"
-
-  //let file = getFileFromDrive("moses-fishing.jpg");
-  //let file = getFileFromDrive("Rick&Morty-viewer2Insight-scaled.png");
-
-  let sheetID = '11tdSmNDpvY1ATQLZvHXmJ2yi_44a94EwzUmTUUkRg1s';
-  let sheetName = 'Copy of KIT';
-  let col = 2;
-  let row = 10;
-
-  // 19/5/22 DH:
-  let params = JSON.stringify(passedParams);
-  let imgFile = getFileFromDrive(passedParams.postData.contents);
-  let titleVal = passedParams.postData.contents;
-
-  // 20/5/22 DH: the year anniversary...ffs...!!!
-  //console.log(e);
-  //Logger.log(e);
-
   try {
-    // https://developers.google.com/apps-script/reference/utilities/utilities#formatDate(Date,String,String)
-    //let date = Utilities.formatDate(new Date(), "GMT+1", "dd/MM/yyyy HH:mm:ss");
-    let time = Utilities.formatDate(new Date(), "GMT+1", "HH:mm:ss");
-  
-    let logFilename = Utilities.formatDate(new Date(), "GMT+1", "dMMMyyyy");
-    let logDoc = getLogfile(time, logFilename);
 
-    let sheet = SpreadsheetApp.openById(sheetID).getSheetByName(sheetName);
+    initLog();
 
-    // 22/9/24 DH: Refactor
-    let imageDetails = deleteImg(logDoc, time, sheet, row, col);
-    insertImage(logDoc, time, sheet, row, col, imgFile, titleVal);
+    // New HttpParams add to Post
+    if (passedParams.parameter.action !== undefined) {
+      let params = JSON.stringify(passedParams);
+      logMsg("'parameter.action' defined: "+ params);
 
-    let msg = "msg: TBD";
-    if (imgFile){
-      msg = "img file id: " + imgFile.getId();
+      let img = passedParams.addImg;
+      logMsg('passedParams.addImg: '+ img);
+
+      let sheetName = passedParams.parameter.sheetName;
+      let action = passedParams.parameter.action;
+      let value = passedParams.parameter.value;
+
+      var imgFile = doAction(sheetName, action, value, img);
     }
-    return ContentService.createTextOutput('insertImage() worked fine...inching there...' + msg );
-    
+
+    // Old format of just passing the filename, SO ADD:
+    //   "addImgFromName", "sheetName", passedParams.postData.contents
+    else {    
+      let sheetName = 'Copy of KIT';
+      let titleVal = passedParams.postData.contents;
+
+      var imgFile = doAction(sheetName, "addImgFromName", titleVal, null);
+    }
+
+    // 14/10/24 DH: TODO: Return a Base64 of the 'imgFile' rather than the 'id'
+    try {
+      var msg = "img file id: " + imgFile.getId();
+      return ContentService.createTextOutput('insertImage() worked fine...inching there...' + msg );
+      
+    } 
+    // "getDriveImg" returns 'images.html' so NOT THE ADDED FILE
+    catch(error) {
+      logMsg("'imgFile' is not a file so returning it as string (prob because it is Base64)");
+      return ContentService.createTextOutput(imgFile);
+    }
+
   } catch(error) {
 
     return ContentService.createTextOutput('insertImage() failed...: ' + error);
@@ -76,3 +111,4 @@ function doPost(passedParams){
   }
 
 }
+

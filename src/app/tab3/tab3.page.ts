@@ -22,6 +22,10 @@ import { AppscriptService } from '../services/appscript.service';
 export class Tab3Page {
 
   filename: string;
+  gdriveImg: string;
+  imgBase64Src: string;
+  dtg1: string;
+  dtg2: string;
 
   // 8/5/22 DH: Ideally this should be read from the google sheet for DB normalisation (legacy comment from 'selection.component.ts')
   fileList: string[] = [
@@ -34,6 +38,10 @@ export class Tab3Page {
 
   constructor(private http: HttpClient, private appscriptService: AppscriptService) {
     this.filename = "TBD";
+    this.gdriveImg = "20241010_192026.jpg";
+    this.imgBase64Src = "";
+    this.dtg1 = "";
+    this.dtg2 = "";
   }
 
   // 17/9/24 DH: A fresh start with GScript interaction using Ionic 7/Angular 18/Node 20
@@ -86,14 +94,14 @@ export class Tab3Page {
     .subscribe(blob => {
 
       formData.append('addImg', blob);
-      this.postGScript("addImg", "Copy of KIT", imgName, formData);
+      this.postGScriptLocal("addImg", "Copy of KIT", imgName, formData);
 
     });
         
   }
 
   // 1/10/24 DH:
-  postGScript(action: string, sheetName: string, value: string, formData: FormData) {
+  postGScriptLocal(action: string, sheetName: string, value: string, formData: FormData) {
     let retVal: Observable<any>;
     // 28/9/24 DH: https://v17.angular.io/guide/http-send-data-to-server
     let params = new HttpParams();
@@ -151,7 +159,52 @@ export class Tab3Page {
     });
 
     let formData: FormData = new FormData();
-    this.postGScript("addEmailImg", "Copy of KIT", imgName, formData);
+    this.postGScriptLocal("addEmailImg", "Copy of KIT", imgName, formData);
+
+  }
+
+  // -----------------
+  // Get GDrive image
+  // -----------------
+
+  // 13/10/24 DH:
+  getGDriveImg() {
+    let formData: FormData = new FormData();
+
+    let retVal: Observable<any>;
+    // 28/9/24 DH: https://v17.angular.io/guide/http-send-data-to-server
+    let params = new HttpParams();
+
+    params = params.set('action', 'getDriveImg');
+    params = params.set('value', this.gdriveImg);
+
+    console.log("Calling 'this.http.post()'");
+    
+    this.dtg1 = new Date().toString();
+
+    // 28/9/24 DH: (14:30) Get CORS error without sending data arg (prob a "port scan" defence)
+    
+    // https://v17.angular.io/api/common/http/HttpClient
+    retVal = this.http.post(this.appscriptService.url2, formData, {params: params, responseType: 'text'});
+    //retVal = this.http.post(this.appscriptService.url2, formData, {params: params, responseType: 'arraybuffer'});
+    
+    // Capacitor on Android returns: "Msg: ERROR [object Object]"
+    //retVal = this.http.post(this.appscriptService.url2, formData, {params: params, responseType: 'json'});
+
+    // 18/9/24 DH: Without 'retVal.subscribe(...)' then NOT WORK
+    retVal.subscribe((base64Img) => {
+      // Timings (secs)
+      // -------
+      // Resized image: 7,9,7 (slower than Browser Google JS, see 'driveUtils.gs') 
+
+      this.dtg2 = new Date().toString();
+
+      let srcHdrStr = "data:image/png;base64, ";
+
+      // 14/10/24 DH: <img [src]="imgBase64Src"> DOM Obj resolves the JPG/Base64 string
+      this.imgBase64Src = srcHdrStr + base64Img;
+
+    });
 
   }
 

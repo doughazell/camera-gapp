@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+
+    <!--
+    <script>
+      function onFailure(error) {
+        var div = document.getElementById('output');
+        div.innerHTML = "ERROR: " + error.message;
+      }
+
+      var imgFile = google.script.run.withFailureHandler(onFailure)
+          .getDriveImg('20241010_192026.jpg');
+    </script>
+    -->
+
+  </head>
+  <body>
+    <h1>Nice work, good job...</h1>
+
+    <div id="output1"></div>
+    <div id="output2"></div>
+    <img id="outputImg">
+
+    <!-- HTML Comments vs "//" JS comments inside <script>...</script> -->
+    
+    <!-- 
+      REMEMBER this gets delivered to the client browser which creates a https connection 
+      with Google Workspace + Promise handler via 
+      'google.script.run.withSuccessHandler(...).funcName(...)' (using bundled Google JS)
+    -->
+    <script>
+      var div1 = document.getElementById('output1');
+      var dtg1 = new Date().toString();
+      div1.innerHTML = dtg1 + "<br> Sorted...getting there <br>";
+      
+      // REMEMBER: https://developers.google.com/apps-script/guides/html/reference/run
+
+      function onSuccess(base64img) {
+        var outputImg = document.getElementById('outputImg');
+
+        //outputImg.src="data:image/jpg;base64,"+base64img;
+
+        var srcHdrStr = "data:image/png;base64, ";
+        // 14/10/24 DH: <img src> DOM Obj resolves the JPG/Base64 string
+        outputImg.src = srcHdrStr + base64img;
+        
+        var div2 = document.getElementById('output2');
+        var dtg2 = new Date().toString();
+        div2.innerHTML = dtg2 + "<br> from: outputImg.src = " + srcHdrStr + "<br>" + base64img.substring(0, 100) + "... <br>" + "<br> to: "; 
+      }
+
+      var desiredWidth = 500;
+
+      google.script.run.withSuccessHandler(onSuccess).getResizedBase64Img(<?= imgName ?>, desiredWidth);
+
+    </script>
+
+  </body>
+</html>
+

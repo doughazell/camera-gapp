@@ -176,7 +176,6 @@ function addSharedImgWrapper(sheetName, value) {
 
 }
 
-
 // 1/10/24 DH: Refactor
 function doAction(sheetName, action, value, img) {
   let retVal = "TBD";
@@ -206,6 +205,13 @@ function doAction(sheetName, action, value, img) {
 
   else if(action.indexOf("addSharedImg") > -1) {
     return addSharedImgWrapper(sheetName, value);
+  }
+
+  // 13/10/24 DH:
+  else if(action.indexOf("getDriveImg") > -1) {
+    let desiredWidth = 500;
+    return getResizedBase64Img(value, desiredWidth);
+
   }
 
   else {
