@@ -10,6 +10,13 @@ import { EmailComposer } from 'capacitor-email-composer';
 // 7/10/24 DH:
 import { AppscriptService } from '../services/appscript.service';
 
+// 17/10/24 DH:
+import { Platform } from '@ionic/angular';
+import { App } from '@capacitor/app';
+
+var gAIResultImgName: string;
+var gThis: Tab3Page;
+
 @Component({
   selector: 'app-tab3',
   templateUrl: 'tab3.page.html',
@@ -23,7 +30,10 @@ export class Tab3Page {
 
   filename: string;
   gdriveImg: string;
-  imgBase64Src: string;
+
+  aiResultImgName: string;
+  imgBase64Src1: string;
+  imgBase64Src2: string;
   dtg1: string;
   dtg2: string;
 
@@ -36,12 +46,16 @@ export class Tab3Page {
     'Rick&Morty-robotVsVideogame.png'
   ];
 
-  constructor(private http: HttpClient, private appscriptService: AppscriptService) {
+  constructor(private http: HttpClient, private appscriptService: AppscriptService, private platform: Platform) {
     this.filename = "TBD";
     this.gdriveImg = "20241010_192026.jpg";
-    this.imgBase64Src = "";
+
+    this.aiResultImgName = "";
+    this.imgBase64Src1 = "";
+    this.imgBase64Src2 = "";
     this.dtg1 = "";
     this.dtg2 = "";
+
   }
 
   // 17/9/24 DH: A fresh start with GScript interaction using Ionic 7/Angular 18/Node 20
@@ -168,7 +182,7 @@ export class Tab3Page {
   // -----------------
 
   // 13/10/24 DH:
-  getGDriveImg() {
+  getGDriveImg(imgFilename: string, varName: string) {
     let formData: FormData = new FormData();
 
     let retVal: Observable<any>;
@@ -176,7 +190,8 @@ export class Tab3Page {
     let params = new HttpParams();
 
     params = params.set('action', 'getDriveImg');
-    params = params.set('value', this.gdriveImg);
+    // PREVIOUSLY on "THE Whether Stn": params = params.set('value', this.gdriveImg);
+    params = params.set('value', imgFilename);
 
     console.log("Calling 'this.http.post()'");
     
@@ -193,6 +208,7 @@ export class Tab3Page {
 
     // 18/9/24 DH: Without 'retVal.subscribe(...)' then NOT WORK
     retVal.subscribe((base64Img) => {
+
       // Timings (secs)
       // -------
       // Resized image: 7,9,7 (slower than Browser Google JS, see 'driveUtils.gs') 
@@ -202,9 +218,94 @@ export class Tab3Page {
       let srcHdrStr = "data:image/png;base64, ";
 
       // 14/10/24 DH: <img [src]="imgBase64Src"> DOM Obj resolves the JPG/Base64 string
-      this.imgBase64Src = srcHdrStr + base64Img;
 
+      // PREVIOUSLY on "THE Whether Stn": this.imgBase64Src = srcHdrStr + base64Img;
+
+      console.log("varName: ", varName, " being updated with: ", imgFilename);
+      
+      if (varName == 'imgBase64Src1') {
+        this.imgBase64Src1 = srcHdrStr + base64Img;
+      }
+      else if (varName == 'imgBase64Src2') {
+        this.imgBase64Src2 = srcHdrStr + base64Img;
+      }
+
+      // 17/10/24 DH: TODO: Trigger refresh if Hybrid App (prob with custom Capacitor Plugin "AndroidEvents"), since: 
+      //              'App.appStateChange' => Post => 'Callback <img> update' NEEDS "Blur/Focus" Event to trigger updating image
+      //                                      Post => 'Callback <img> update' AUTO UPDATES image
+      
     });
+
+  }
+
+  // 16/10/24 DH:
+  getColabService() { 
+    /*
+    // router.navigate
+    // ---------------
+    // https://github.com/doughazell/ionic-camera-swipe/blob/master/src/app/tabs/tabs.page.ts#L77
+    // https://github.com/doughazell/ionic-camera-swipe/blob/master/src/app/tab1/google-error/google-error.page.ts#L18
+    
+    //window.addEventListener('focus', this.checkUpdate);
+    //document.addEventListener("visibilitychange", function() {});
+    //if(document.hidden) {}
+    */
+
+    let colabURL = "https://colab.research.google.com/drive/1PkbQG9jiaS8EKWnFF_jEJRyGbUBhAA5I";
+
+    // TODO: Set this variable dynamically
+    this.aiResultImgName = "topfeatures.png";
+
+    gAIResultImgName = "coefficients.png";
+    // Access 'this' in App Event Listener callback
+    gThis = this;
+
+    // "hybrid" will detect Cordova or Capacitor
+    if (this.platform.is('hybrid')) { 
+      
+      this.getGDriveImg(this.aiResultImgName, 'imgBase64Src2');
+
+      // https://capacitorjs.com/docs/apis/app
+      App.addListener('appStateChange', ({ isActive }) => {
+        console.log('App state changed. Is active?', isActive);
+        if (isActive) {
+          this.checkUpdate();
+        }
+      });
+    }
+    // Webpack Browser
+    else {
+      // FIRST RUN the Python Colab AI
+      window.open(colabURL);
+
+      // THEN send the result image download request
+      this.getGDriveImg(this.aiResultImgName, 'imgBase64Src2');
+
+      console.log("document.addEventListener('focus', this.checkUpdate);");
+      document.addEventListener('focus', this.checkUpdate);
+    }
+
+  }
+
+  // 17/10/24 DH: Callback for JS + Capacitor event listeners
+  checkUpdate() {
+    // 17/10/24 DH: 'gAIResultImgName.length' is the flag to recheck the output file
+    if (gAIResultImgName.length > 0) {
+      console.log("'checkUpdate()' getting ", gAIResultImgName);
+      gThis.getGDriveImg(gAIResultImgName, 'imgBase64Src2');
+
+      // Reset the flag
+      gAIResultImgName = "";
+
+      // "hybrid" will detect Cordova or Capacitor
+      if (this.platform.is('hybrid')) {
+        console.log("CALLING: 'App.removeAllListeners()'");
+        App.removeAllListeners();
+      }
+    }
+    else {
+      console.log("'checkUpdate()' doing nothing: ", gAIResultImgName);
+    }
 
   }
 

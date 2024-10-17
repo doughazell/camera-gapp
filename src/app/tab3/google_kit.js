@@ -27,15 +27,6 @@ function doGet(passedParams) {
 
     initLog();
 
-    /*
-    SpreadsheetApp.openById(sheetID).getSheetByName(sheetName).insertImage(imageUrl,col,row);
-
-    // 17/5/22 DH: CORS header error without using 'ContentService.createTextOutput()'
-    return ContentService.createTextOutput('insertImage() worked fine...17Sep24');
-      //.setMimeType(ContentService.MimeType.JAVASCRIPT);
-      //.setMimeType(ContentService.MimeType.JSON);
-     */
-
     //logMsg(params);
 
     // 13/10/24 DH:
@@ -56,7 +47,6 @@ function doGet(passedParams) {
     return servTemplate.evaluate();
 
   } catch(error) {
-    //return HtmlService.createHtmlOutput(error);
     return ContentService.createTextOutput('insertImage() FAILED - 17Sep24 ' + error);
   }
   
@@ -92,14 +82,12 @@ function doPost(passedParams){
       var imgFile = doAction(sheetName, "addImgFromName", titleVal, null);
     }
 
-    // 14/10/24 DH: TODO: Return a Base64 of the 'imgFile' rather than the 'id'
+    // 14/10/24 DH: Return a Base64 of the 'imgFile' rather than the 'id'
     try {
       var msg = "img file id: " + imgFile.getId();
       return ContentService.createTextOutput('insertImage() worked fine...inching there...' + msg );
       
-    } 
-    // "getDriveImg" returns 'images.html' so NOT THE ADDED FILE
-    catch(error) {
+    } catch(error) {
       logMsg("'imgFile' is not a file so returning it as string (prob because it is Base64)");
       return ContentService.createTextOutput(imgFile);
     }

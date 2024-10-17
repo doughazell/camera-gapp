@@ -13,6 +13,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AppscriptService {
+  // "$ ionic serve" uses https://www.npmjs.com/package/webpack-dev-server
 
   // -------------------------------------------------------
   // *** NOTE: REMOVE ACTIVE URL BEFORE ADDING TO GITHUB ***
