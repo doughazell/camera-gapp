@@ -48,8 +48,10 @@
           -->
 
           {{dtg1}}
+          <!--
           <br>
           {{dtg2}}
+          -->
           <br>
           <!-- <img [src]="imgBase64Src"> does the same thing -->
           <img src={{imgBase64Src1}}>
@@ -67,15 +69,22 @@
           </ion-button>
 
           <br>
+          {{dtg3}}
+          <br>
           <img src={{imgBase64Src2}}>
+
+          <!--
+          <ion-button (click)="recordTime()">
+            <ion-icon name="alarm-outline"></ion-icon>
+            <ion-label >Stop clock</ion-label>
+          </ion-button>
+          -->
 
         </p>
       </ion-col>
 
     </ion-row>
   </ion-grid>
-
-  
 
   <!-- <div [innerHTML]="gdriveImg"></div> -->
 

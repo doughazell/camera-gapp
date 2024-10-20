@@ -12,9 +12,18 @@ import { AppscriptService } from '../services/appscript.service';
 
 // 17/10/24 DH:
 import { Platform } from '@ionic/angular';
+
+// https://capacitorjs.com/docs/apis/app
+//
+// https://github.com/ionic-team/capacitor-plugins
+// https://github.com/ionic-team/capacitor-plugins/blob/main/app/android/src/main/java/com/capacitorjs/plugins/app/AppPlugin.java
+//
+// https://github.com/ionic-team/capacitor/blob/main/android/capacitor/src/main/java/com/getcapacitor/Plugin.java
 import { App } from '@capacitor/app';
 
 var gAIResultImgName: string;
+var gInitImg: string;
+var gReCheckFlag: Number;
 var gThis: Tab3Page;
 
 @Component({
@@ -27,15 +36,17 @@ var gThis: Tab3Page;
 // 18/9/24 DH: @Injectable decorator not needed BUT "providers: [..., provideHttpClient(),]," IS NEEDED in 'app.module.ts'
 //@Injectable({providedIn: 'root'})
 export class Tab3Page {
+  filename = "TBD";
+  gdriveImg = "20241010_192026.jpg";
+  aiResultImgName = "";
 
-  filename: string;
-  gdriveImg: string;
+  imgBase64Src1 = "";
+  imgBase64Src2 = "";
 
-  aiResultImgName: string;
-  imgBase64Src1: string;
-  imgBase64Src2: string;
-  dtg1: string;
-  dtg2: string;
+  dtg1 = "";
+  dtg2 = "";
+  dtg3 = "";
+  baseTime = 0;
 
   // 8/5/22 DH: Ideally this should be read from the google sheet for DB normalisation (legacy comment from 'selection.component.ts')
   fileList: string[] = [
@@ -46,17 +57,7 @@ export class Tab3Page {
     'Rick&Morty-robotVsVideogame.png'
   ];
 
-  constructor(private http: HttpClient, private appscriptService: AppscriptService, private platform: Platform) {
-    this.filename = "TBD";
-    this.gdriveImg = "20241010_192026.jpg";
-
-    this.aiResultImgName = "";
-    this.imgBase64Src1 = "";
-    this.imgBase64Src2 = "";
-    this.dtg1 = "";
-    this.dtg2 = "";
-
-  }
+  constructor(private http: HttpClient, private appscriptService: AppscriptService, private platform: Platform) {}
 
   // 17/9/24 DH: A fresh start with GScript interaction using Ionic 7/Angular 18/Node 20
   
@@ -193,9 +194,10 @@ export class Tab3Page {
     // PREVIOUSLY on "THE Whether Stn": params = params.set('value', this.gdriveImg);
     params = params.set('value', imgFilename);
 
-    console.log("Calling 'this.http.post()'");
-    
-    this.dtg1 = new Date().toString();
+    console.log("Calling 'this.http.post()' with '",imgFilename,"'");
+
+    this.recordTime();
+    //this.dtg1 = new Date().toString();
 
     // 28/9/24 DH: (14:30) Get CORS error without sending data arg (prob a "port scan" defence)
     
@@ -213,7 +215,8 @@ export class Tab3Page {
       // -------
       // Resized image: 7,9,7 (slower than Browser Google JS, see 'driveUtils.gs') 
 
-      this.dtg2 = new Date().toString();
+      this.recordTime();
+      //this.dtg2 = new Date().toString();
 
       let srcHdrStr = "data:image/png;base64, ";
 
@@ -228,13 +231,85 @@ export class Tab3Page {
       }
       else if (varName == 'imgBase64Src2') {
         this.imgBase64Src2 = srcHdrStr + base64Img;
+
+        if (imgFilename == this.aiResultImgName) {
+          console.log("Setting 'imgBase64Src1' to ", imgFilename);
+          
+          gInitImg = srcHdrStr + base64Img; // Sometimes need to readd 'this.imgBase64Src1' (prob due to non-Atomic sleep/Event sync)
+          this.imgBase64Src1 = gInitImg;
+        }
       }
 
       // 17/10/24 DH: TODO: Trigger refresh if Hybrid App (prob with custom Capacitor Plugin "AndroidEvents"), since: 
-      //              'App.appStateChange' => Post => 'Callback <img> update' NEEDS "Blur/Focus" Event to trigger updating image
-      //                                      Post => 'Callback <img> update' AUTO UPDATES image
+      //             1) 'App.appStateChange' => Post => 'Callback <img> update' NEEDS "Blur/Focus" Event to trigger updating image
+      //             2)                         Post => 'Callback <img> update' AUTO UPDATES image
+      //             [This works as desired on Webpack Browser AND now works with JUST A TIMER CALLBACK on Android]
+      //
+      // UPDATE: https://github.com/ionic-team/capacitor-plugins/blob/main/app/android/src/main/java/com/capacitorjs/plugins/app/AppPlugin.java
       
+      // DEV
+      // ---
+      //App.reDraw();
+      //App.minimizeApp();
+
+      // 19/10/24 DH: Now need to read other Capacitor Plugins to learn how WebView effected.
+
+      if (imgFilename == gAIResultImgName) {
+        gAIResultImgName = imgFilename + " received"
+      }
+
     });
+
+  }
+
+  // 17/10/24 DH:
+  recordTime() {
+    if (this.baseTime == 0){
+      this.baseTime = new Date().getTime();
+    }
+
+    this.dtg1 = (Math.round( (new Date().getTime() - this.baseTime) / 1000 ).toString()) + " secs";
+
+    if (gAIResultImgName.indexOf("received") > -1) {
+      //this.dtg3 = gAIResultImgName;
+      
+      // Reset the flag that was updated in 'getGDriveImg.subscribe'
+      gAIResultImgName = "";
+    }
+  }
+
+  // 17/10/24 DH: Trigger the auto image update
+  runTimeCycle() {
+    /*
+    if (this.baseTime == 0){
+      this.baseTime = new Date().getTime();
+    }
+    */
+
+    console.log("WebView (UI Thread) woken to check: ", gAIResultImgName);
+    //App.minimizeApp();
+
+    // 20/10/24 DH: Readd first img since Update Event sometimes lost in sleep schedule
+    this.imgBase64Src1 = gInitImg;
+
+    // ie "received" is NOT PART of 'gAIResultImgName'
+    if (gAIResultImgName.indexOf("received") == -1) {
+
+      //this.dtg3 = Math.round( (new Date().getTime() - this.baseTime) / 1000 ).toString();
+
+      // 19/10/24 DH: Seems to be ENOUGH TO TRIGGER 'onDraw()' (which previously only occurred via "minimize-refocus" on Android 
+      //                                                        after 'App.appStateChange' => Post => 'Callback <img> update')
+      setTimeout(() => { 
+        this.runTimeCycle();
+      }, 500); // arg 2 = msecs
+    }
+    /*
+    else {
+      // Min 16 "=" to move col to full row
+      this.dtg3 = "================";
+      //this.baseTime = 0;
+    }
+    */
 
   }
 
@@ -251,57 +326,79 @@ export class Tab3Page {
     //if(document.hidden) {}
     */
 
+    console.log("=================================");
+    console.log("FRESH START: getColabService()...");
+    console.log("=================================");
+
     let colabURL = "https://colab.research.google.com/drive/1PkbQG9jiaS8EKWnFF_jEJRyGbUBhAA5I";
 
     // TODO: Set this variable dynamically
     this.aiResultImgName = "topfeatures.png";
 
+    // Reset imgs
+    this.imgBase64Src1 = "";
+    this.imgBase64Src2 = "";
+    gInitImg = "";
+
+    gReCheckFlag = 0;
     gAIResultImgName = "coefficients.png";
     // Access 'this' in App Event Listener callback
     gThis = this;
+    // Reset counter
+    this.baseTime = 0
+
+    // -----------------------------------------------------------
+    // FIRST RUN the Python Colab AI
+    window.open(colabURL);
+
+    // THEN send the result image download request
+    this.getGDriveImg(this.aiResultImgName, 'imgBase64Src2');
+    // -----------------------------------------------------------
 
     // "hybrid" will detect Cordova or Capacitor
     if (this.platform.is('hybrid')) { 
-      
-      this.getGDriveImg(this.aiResultImgName, 'imgBase64Src2');
 
       // https://capacitorjs.com/docs/apis/app
       App.addListener('appStateChange', ({ isActive }) => {
         console.log('App state changed. Is active?', isActive);
         if (isActive) {
+          // 17/10/24 DH: When 1) this fires + 2) resulting image callback fires then 3) img NOT updated AUTOMATICALLY 
+          //              (see comment in 'getGDriveImg(...)')
           this.checkUpdate();
         }
       });
     }
     // Webpack Browser
     else {
-      // FIRST RUN the Python Colab AI
-      window.open(colabURL);
-
-      // THEN send the result image download request
-      this.getGDriveImg(this.aiResultImgName, 'imgBase64Src2');
-
       console.log("document.addEventListener('focus', this.checkUpdate);");
       document.addEventListener('focus', this.checkUpdate);
     }
 
+    // Trigger auto image update in Android (by just waking UI Task via Angular in Android WebView)
+    // https://developer.android.com/reference/android/webkit/WebView
+    //
+    // THIS NEEDS TO BE CALLED FROM WEBVIEW METHOD (ie '<ion-button (click)="getColabService()">')
+    this.runTimeCycle();
+
   }
 
-  // 17/10/24 DH: Callback for JS + Capacitor event listeners
+  // 17/10/24 DH: Callback for JS + Capacitor event listeners (NOT WEBVIEW THREAD)
   checkUpdate() {
     // 17/10/24 DH: 'gAIResultImgName.length' is the flag to recheck the output file
-    if (gAIResultImgName.length > 0) {
-      console.log("'checkUpdate()' getting ", gAIResultImgName);
-      gThis.getGDriveImg(gAIResultImgName, 'imgBase64Src2');
-
-      // Reset the flag
-      gAIResultImgName = "";
+    if (gReCheckFlag == 0) {
+      gReCheckFlag = 1;
 
       // "hybrid" will detect Cordova or Capacitor
-      if (this.platform.is('hybrid')) {
-        console.log("CALLING: 'App.removeAllListeners()'");
+      if (gThis.platform.is('hybrid')) { 
+        console.log("CALLING: 'App.removeAllListeners()'")
         App.removeAllListeners();
+        //App.removeListener('appStateChange');
       }
+
+      console.log("REMOVE FOR DEV: 'checkUpdate()' getting ", gAIResultImgName);
+
+      gThis.getGDriveImg(gAIResultImgName, 'imgBase64Src2');
+
     }
     else {
       console.log("'checkUpdate()' doing nothing: ", gAIResultImgName);

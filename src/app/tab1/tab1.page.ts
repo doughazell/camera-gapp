@@ -28,6 +28,7 @@ export class Tab1Page {
 
   // 28/9/24 DH: Needed for https://angular.dev/guide/templates/binding#render-dynamic-text-with-text-interpolation
   sheetName = "TBD";
+  errorMsg = "";
 
   constructor(private http: HttpClient, private appscriptService: AppscriptService) {
     this.dtg = new Date();
@@ -133,7 +134,15 @@ export class Tab1Page {
     retVal.subscribe((response) => {
       console.log('Response: ', response);
       
-      this.parseResponse(response);
+      // 17/10/24 DH: URL not set
+      if (response.indexOf("app-root") > -1) {
+        this.errorMsg = "URL not set correctly: '" + this.appscriptService.url1 + "'";
+      }
+      else {
+        this.parseResponse(response);
+      }
+
+      
     });
   }
 
