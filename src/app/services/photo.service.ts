@@ -10,6 +10,9 @@ import { Capacitor } from '@capacitor/core';
 // 7/10/24 DH:
 import { AppscriptService } from './appscript.service';
 
+// 27/10/24 DH:
+import { Router, ActivatedRoute } from '@angular/router';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,8 +21,33 @@ export class PhotoService {
   private PHOTO_STORAGE: string = 'photos';
   private platform: Platform;
 
-  constructor(platform: Platform, public appscriptService: AppscriptService) { 
+  // 21/10/24 DH:
+  /*
+  options: ViewerOptions = {} as ViewerOptions;
+  pvPlugin: any;
+  show: any;
+  //viewerPage: ViewerPage;
+  */
+
+  constructor(platform: Platform, public appscriptService: AppscriptService, private router: Router) { 
     this.platform = platform;
+  }
+
+  // 21/10/24 DH:
+  public async showPicture(photo: UserPhoto, position: number) {
+    //console.log("showPicture(): photo.filepath: ", photo.filepath);
+    //console.log("photo.webviewPath: ", photo.webviewPath);
+
+    // 27/10/24 DH: in shock that I've actually integrated 'photoviewer'...
+
+    // modes: 'one', 'gallery', 'slider'
+    this.router.navigateByUrl('/tabs/tab2/viewer/slider/' + position);
+
+  }
+
+  // 27/10/24 DH:
+  public getPicture(idx: number) {
+    return this.photos[idx];
   }
 
   // 19/8/24 DH: and we're back in Ionic/Angular land...:)

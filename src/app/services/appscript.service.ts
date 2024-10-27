@@ -18,9 +18,9 @@ export class AppscriptService {
   // -------------------------------------------------------
   // *** NOTE: REMOVE ACTIVE URL BEFORE ADDING TO GITHUB ***
   // -------------------------------------------------------
-  public url1 = '';
+  public url1 = 'https://script.google.com/macros/s/AKfycbzs0GeBF8c7stPAXG3bNaPN-si0lgZQAt8wn6daVukqM6XZ8dt6fSBLeD78MHExRwja9A/exec';
 
-  public url2 = '';
+  public url2 = 'https://script.google.com/macros/s/AKfycbyUMoayAQgugoi7ErXH9DHIk-lBcArc4HhiuD7nmp_OTvRTZucTCiYieo_ULV9krRJ1uQ/exec';
 
   constructor(private http: HttpClient) { }
 

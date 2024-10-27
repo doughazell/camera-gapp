@@ -1,4 +1,5 @@
-import { NgModule } from '@angular/core';
+// 21/10/24 DH: CUSTOM_ELEMENTS_SCHEMA,
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 
@@ -18,5 +19,7 @@ import { provideHttpClient } from '@angular/common/http';
     provideHttpClient(),
   ],
   bootstrap: [AppComponent],
+  // 21/10/24 DH:
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}
