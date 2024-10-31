@@ -51,7 +51,7 @@ export class ViewerPage  implements OnInit{
     console.log("ViewerPage.constructor() this.platform: ", this.platform);
   }
 
-  // 27/10/24 DH:
+  // 27/10/24 DH: Called after default image library created by 'ngOnInit()'
   addImg(photoNumber: number) {
     let userPhoto: UserPhoto = this.photoService.getPicture(photoNumber);
 
@@ -78,8 +78,8 @@ export class ViewerPage  implements OnInit{
       {url: 'https://i.ibb.co/wc9rSgw/desserts.jpg', title: 'Desserts Table'},
 
       // URLs not work
-      {url: 'https://i.picsum.photos/id/1009/5000/7502.jpg?hmac=Uj6crVILzsKbyZreBjHuMiaq_-n30qoHjqP0i7r30r8', title: 'Surfer'},
-      {url: 'https://i.picsum.photos/id/1011/5472/3648.jpg?hmac=Koo9845x2akkVzVFX3xxAc9BCkeGYA9VRVfLE4f0Zzk', title: 'On a Lac'},
+      //{url: 'https://i.picsum.photos/id/1009/5000/7502.jpg?hmac=Uj6crVILzsKbyZreBjHuMiaq_-n30qoHjqP0i7r30r8', title: 'Surfer'},
+      //{url: 'https://i.picsum.photos/id/1011/5472/3648.jpg?hmac=Koo9845x2akkVzVFX3xxAc9BCkeGYA9VRVfLE4f0Zzk', title: 'On a Lac'},
 
       {url: 'https://i.ibb.co/wdrdpKC/kitten.jpg', title: 'Kitten'},
       {url: 'https://i.ibb.co/dBCHzXQ/paris.jpg', title: 'Paris Eiffel'},
@@ -91,16 +91,30 @@ export class ViewerPage  implements OnInit{
     this.imageList.push(base64Images[1]);
 
     if (this.platform === 'ios') {
+      /*
       this.imageList.push({url: 'file:///var/mobile/Media/DCIM/100APPLE/IMG_0001.JPG', title: 'Image1'});
       this.imageList.push({url: 'file:///var/mobile/Media/DCIM/100APPLE/IMG_0002.JPG', title: 'Image2'});
       this.imageList.push({url: 'capacitor://localhost/_capacitor_file_/var/mobile/Containers/Data/Application/0C6DDAA3-1486-43E1-A7A8-2E9B39107F32/Documents/photo1.jpg', title: 'ImageFromDocument'});
+      */
     }
     if (this.platform === 'android') {
+      /*
       this.imageList.push({url: 'file:///sdcard/DCIM/IMG_0001.JPG', title: 'Image1'});
       this.imageList.push({url: 'file:///sdcard/DCIM/IMG_0002.JPG', title: 'Image2'});
       this.imageList.push({url: 'file:///sdcard/Pictures/IMG_0003.JPG', title: 'Image3'});
       this.imageList.push({url: 'http://localhost/_capacitor_file_/storage/emulated/0/Pictures/JPEG_20221001_113835_7582877022250987909.jpg', title: 'Imagelocalhost'});
       this.imageList.push({url: 'capacitor://localhost/_capacitor_file_/storage/emulated/0/Pictures/JPEG_20221001_102529_2463134056977343449.jpg', title: 'Imagelocalhost'});
+      */
+      
+      // 28/10/24 DH: AppscriptService.emailImg(...):
+      //   eg: file:///storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20241007_164309_575320056677864398.jpg"
+
+      this.imageList.push({url: 'http://localhost/_capacitor_file_/storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20240930_201510_2468843838468358168.jpg', title: 'Me on Android'});
+      
+      // 29/10/24 DH: Need Android App permission for storage: Android_Settings_Apps_"camera-gapp"_Permissions_Storage
+      this.imageList.push({url: 'capacitor://localhost/_capacitor_file_/storage/emulated/0/WhatsApp/Media/WhatsApp Images/IMG-20241028-WA0001.jpg', title: 'Bradyman\'s Armada Dish '});
+      this.imageList.push({url: `${ Capacitor.convertFileSrc('file:///storage/emulated/0/DCIM/Camera/20241014_140133.jpg') }`, title: 'LabRat disclosure'});
+      
     }
     
     //this.startFrom = 2;

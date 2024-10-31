@@ -18,9 +18,9 @@ export class AppscriptService {
   // -------------------------------------------------------
   // *** NOTE: REMOVE ACTIVE URL BEFORE ADDING TO GITHUB ***
   // -------------------------------------------------------
-  public url1 = 'https://script.google.com/macros/s/AKfycbzs0GeBF8c7stPAXG3bNaPN-si0lgZQAt8wn6daVukqM6XZ8dt6fSBLeD78MHExRwja9A/exec';
+  public url1 = '';
 
-  public url2 = 'https://script.google.com/macros/s/AKfycbyUMoayAQgugoi7ErXH9DHIk-lBcArc4HhiuD7nmp_OTvRTZucTCiYieo_ULV9krRJ1uQ/exec';
+  public url2 = '';
 
   constructor(private http: HttpClient) { }
 
@@ -32,8 +32,9 @@ export class AppscriptService {
   emailImg(imgPath: string) {
     //let imgName = "balavil-sunset.jpg";
 
-    // eg "imgPath:  file:///data/user/0/io.ionic.starter/files/1728262878778.jpeg"
-    //               file:///storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20241007_164309_575320056677864398.jpg"
+    // eg "imgPath:  
+    //   CAPACITOR FILESYSTEM:     file:///data/user/0/io.ionic.starter/files/1728262878778.jpeg"
+    //   ANDROID INTERNAL STORAGE: file:///storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20241007_164309_575320056677864398.jpg"
     console.log("imgPath: ", imgPath);
     let pathSplit = imgPath.split("/");
     let imgName = pathSplit.slice(-1)[0];

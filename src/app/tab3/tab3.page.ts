@@ -21,10 +21,18 @@ import { Platform } from '@ionic/angular';
 // https://github.com/ionic-team/capacitor/blob/main/android/capacitor/src/main/java/com/getcapacitor/Plugin.java
 import { App } from '@capacitor/app';
 
+// 31/10/24 DH: https://javascript.plainenglish.io/capture-screenshots-in-angular-with-html2canvas-a-simple-guide-f619bf2ccea4
+//              "camera-gapp$ npm install html2canvas"
+//import html2canvas from 'html2canvas';
+
 var gAIResultImgName: string;
 var gInitImg: string;
 var gReCheckFlag: Number;
 var gThis: Tab3Page;
+
+// 31/10/24 DH:
+//var gFileSentFlagSet: Number;
+var gSheetWindow: any;
 
 @Component({
   selector: 'app-tab3',
@@ -42,6 +50,7 @@ export class Tab3Page {
 
   imgBase64Src1 = "";
   imgBase64Src2 = "";
+  imgBase64Src3 = "";
 
   dtg1 = "";
   dtg2 = "";
@@ -145,14 +154,70 @@ export class Tab3Page {
   // -------------
 
   sendFilenameToGScript() {
+
+    //gFileSentFlagSet = 0;
+
     fetch(this.appscriptService.url2, { method: "POST", body: this.filename })
       .then((res) => {
         console.log("1st Promise: " + res.status);
         return res.text(); // Promise necessary since Response stream read to eof
         //return res.json()
       })
-      .then((res) => console.log("2nd Promise: " + res));
+      .then((base64Img) => {
+        console.log("2nd Promise: " + base64Img.substring(0, 100));
+
+        // 31/10/24 DH: "window.open(sheetURL);" here causes: 'Firefox to prevent opening a "pop-up window"'
+        //              LIKEWISE with 'setTimeout()' callback so NEEDS UI THREAD
+        //gFileSentFlagSet = 1;
+        //console.log("gFileSentFlagSet: ", gFileSentFlagSet);
+
+        // ------------------------------------------------------
+        // 30/10/24 DH: Return screenshot of image inserted sheet
+        // ------------------------------------------------------
+        // https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API/Using_Screen_Capture
+        // "Capturing screen contents as a live MediaStream is initiated by calling navigator.mediaDevices.getDisplayMedia()"
+
+        // GIVES: "DOMException: Permission denied to access property "ownerDocument" on cross-origin object"
+        /*
+        html2canvas(gSheetWindow).then((canvas) => {
+          // Get the image data as a base64-encoded string
+          const imageData = canvas.toDataURL("image/png");
+          this.imgBase64Src1 = imageData;
+        });
+        */
+
+        let srcHdrStr = "data:image/png;base64, ";
+        this.imgBase64Src3 = srcHdrStr + base64Img;
+        
+      });
+    
+    //this.runSheetTimeCycle();
+
+    let sheetURL = "";
+    gSheetWindow = window.open(sheetURL);
+
   }
+
+  /* ------------------- DEV ---------------------
+     
+  // 31/10/24 DH: Opening 'sheetURL' from callback causes: 'Firefox to prevent opening a "pop-up window"'
+  runSheetTimeCycle() {
+    
+    if (! gFileSentFlagSet) {
+      console.log("gFileSentFlagSet: ", gFileSentFlagSet);
+
+      setTimeout(() => { 
+        this.runSheetTimeCycle();
+      }, 1000); // arg 2 = msecs
+    }
+    else {
+      console.log("runSheetTimeCycle 'gFileSentFlagSet'");
+      //window.open(sheetURL);
+    }
+
+  }
+     ------------------- DEV ---------------------
+  */
 
   // ------------
   // Email image
@@ -174,6 +239,8 @@ export class Tab3Page {
     });
 
     let formData: FormData = new FormData();
+
+    // NOTE: Call to 'postGSriptLocal(...)' RATHER THAN 'AppscriptService.postGScript(...)'
     this.postGScriptLocal("addEmailImg", "Copy of KIT", imgName, formData);
 
   }
@@ -181,6 +248,16 @@ export class Tab3Page {
   // -----------------
   // Get GDrive image
   // -----------------
+
+  // 30/10/24 DH: Needing a wrapper around 'getGDriveImg(...)' to be called separate from 'getColabService()'
+  getImg() {
+    gAIResultImgName = "";
+    this.baseTime = 0
+    this.imgBase64Src1 = "";
+
+    this.getGDriveImg(this.gdriveImg, 'imgBase64Src1');
+  }
+
 
   // 13/10/24 DH:
   getGDriveImg(imgFilename: string, varName: string) {

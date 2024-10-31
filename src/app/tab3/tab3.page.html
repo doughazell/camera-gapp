@@ -13,24 +13,7 @@
     </ion-toolbar>
   </ion-header>
 
-  <!-- https://developers.google.com/apps-script/guides/support/troubleshooting#authorization-is -->
-  <p>Send image filename "{{gdriveImg}}" via Get (*** NOW DEV HOOK ***)
-    <!-- <ion-button href="?value={{gdriveImg}}"> -->
-    <ion-button href="https://www.bbc.co.uk/news">
-      <ion-icon name="image"></ion-icon>
-      <ion-label>Add image</ion-label>
-    </ion-button>
-    
-  </p>
-
   <h1>Angular HttpClient</h1>
-
-  <p>Call 'getGScript() to add Google logo'
-    <ion-button (click)="getGScript()">
-      <ion-icon name="image"></ion-icon>
-      <ion-label>Add image</ion-label>
-    </ion-button>
-  </p>
 
   <!-- https://ionicframework.com/docs/api/grid -->
   <ion-grid>
@@ -39,9 +22,9 @@
       <ion-col>
         <h4 style="text-align: center; text-decoration: underline;">Get "{{gdriveImg}}" img</h4>
         <p class="center">
-          <ion-button (click)="getGDriveImg(gdriveImg, 'imgBase64Src1')">
+          <ion-button (click)="getImg()">
             <ion-icon name="image"></ion-icon>
-            <ion-label>Add image</ion-label>
+            <ion-label>Get image</ion-label>
           </ion-button>
           <br>
 
@@ -56,6 +39,8 @@
           -->
           <br>
           <!-- <img [src]="imgBase64Src"> does the same thing -->
+          
+          <!-- <img src={{imgBase64Src1}} height="200"> -->
           <img src={{imgBase64Src1}}>
 
         </p>
@@ -115,6 +100,10 @@
       <ion-icon name="image"></ion-icon>
       <ion-label >Add image</ion-label>
     </ion-button>
+  
+    <br>
+
+    <img src={{imgBase64Src3}}>
   </p>
 
 </ion-content>

@@ -21,14 +21,6 @@ export class PhotoService {
   private PHOTO_STORAGE: string = 'photos';
   private platform: Platform;
 
-  // 21/10/24 DH:
-  /*
-  options: ViewerOptions = {} as ViewerOptions;
-  pvPlugin: any;
-  show: any;
-  //viewerPage: ViewerPage;
-  */
-
   constructor(platform: Platform, public appscriptService: AppscriptService, private router: Router) { 
     this.platform = platform;
   }
@@ -36,10 +28,10 @@ export class PhotoService {
   // 21/10/24 DH:
   public async showPicture(photo: UserPhoto, position: number) {
     //console.log("showPicture(): photo.filepath: ", photo.filepath);
-    //console.log("photo.webviewPath: ", photo.webviewPath);
+    //console.log("showPicture(): photo.webviewPath: ", photo.webviewPath);
 
     // 27/10/24 DH: in shock that I've actually integrated 'photoviewer'...
-
+    // --------------------------------------------------------------------
     // modes: 'one', 'gallery', 'slider'
     this.router.navigateByUrl('/tabs/tab2/viewer/slider/' + position);
 

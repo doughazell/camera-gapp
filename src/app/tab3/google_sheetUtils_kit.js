@@ -2,6 +2,8 @@
 
 var gLogDoc;
 var gTime;
+// 31/10/24 DH:
+var gImgFolder = "gappImages";
 
 // 19/9/24 DH: https://developers.google.com/drive/api/guides/search-shareddrives
 // 22/9/24 DH: https://developers.google.com/apps-script/reference/drive/file-iterator
@@ -171,7 +173,9 @@ function populateGoogleWorkspace(message, sheetName) {
   // 22/9/24 DH: TODO: Dynamically allocate row, col
   let col = 2;
   let row = 9;
-  let imgFolder = "gappImages";
+
+  // 31/10/24 DH: Now moved to 'gImgFolder'
+  //let imgFolder = "gappImages";
 
   let attachments = message.getAttachments();
   let blob = attachments[0];
@@ -183,23 +187,12 @@ function populateGoogleWorkspace(message, sheetName) {
 
   logMsg("DELETED EMAIL subject: " + subject + ", img name: " + titleVal);
 
-  // 6/10/24 DH: Save img at full size (before it may get reduced in 'addResizedImg(...)' )
-  var folders = DriveApp.getFoldersByName(imgFolder);
-  let cnt = 0;
-  while (folders.hasNext()) {
-    var folder = folders.next();
-    cnt++;
+  // ======================================================================================
 
-    folder.createFile(blob).setName(titleVal);
-    logMsg("Saved '" + titleVal + "' in '" + folder.getName() + "'");
-    logMsg("Breaking out of '" + imgFolder + "', id: " + folder.getId() )
-    break;
-  }
-  if (cnt == 0) {
-    var folder = DriveApp.createFolder(imgFolder);
-    folder.createFile(blob).setName(titleVal);
-    logMsg("Saved '" + titleVal + "' IN NEW '" + folder.getName() + "'");
-  }
+  // 31/10/24 DH: Refactor to use for returning Base64 blob of sheet
+  saveBlob(gImgFolder, blob);
+  
+  // ======================================================================================
 
   let sheet = SpreadsheetApp.openById(gSheetID).getSheetByName(sheetName);
 
@@ -216,3 +209,29 @@ function populateGoogleWorkspace(message, sheetName) {
 
 }
 
+// 31/10/24 DH:
+function saveBlob(imgFolder, blob) {
+  let titleVal = blob.getName();
+
+  // 6/10/24 DH: Save img at full size (before it may get reduced in 'addResizedImg(...)' )
+  var folders = DriveApp.getFoldersByName(imgFolder);
+
+  let cnt = 0;
+  while (folders.hasNext()) {
+    var folder = folders.next();
+    cnt++;
+
+    folder.createFile(blob).setName(titleVal);
+
+    logMsg("Saved '" + titleVal + "' in '" + folder.getName() + "'");
+    logMsg("Breaking out of '" + imgFolder + "', id: " + folder.getId() )
+    break;
+  }
+  if (cnt == 0) {
+    // Firstly need to create 'imgFolder'
+    var folder = DriveApp.createFolder(imgFolder);
+
+    folder.createFile(blob).setName(titleVal);
+    logMsg("Saved '" + titleVal + "' IN NEW '" + folder.getName() + "'");
+  }
+}

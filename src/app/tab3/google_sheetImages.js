@@ -14,10 +14,29 @@ function addImgFromName(sheetName, titleVal) {
   let imageDetails = deleteImg(sheet, row, col);
   insertImage(sheet, row, col, imgFile, titleVal);
 
-  return imgFile;
+  // 31/10/24 DH: Return Base64 encoding of Sheet image (to display on 'Tab3Page.imgBase64Src1')
+
+  // https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet#getBlob()
+  let updatedSheetBlob = sheet.getParent().getBlob();
+  saveBlob(gImgFolder, updatedSheetBlob);
+
+  // https://github.com/tanaikech/ImgApp?tab=readme-ov-file#usage-crop-image
+
+  // TAKEN FROM: 'doAction(...)::else if(action.indexOf("getDriveImg") > -1)'
+  let desiredWidth = 500;
+  return getResizedBase64Img(updatedSheetBlob.getName(), desiredWidth);
+
+  //return imgFile;
 }
 
 // 1/10/24 DH:
+//
+// [TAKEN FROM: 'doAction(...)']
+// -----------------------------
+// 'Tab3Page.postImg()' sends: Post (filename, blob)
+// [and CURRENTLY DOES NOT WORK ]
+//  ...despite 'contentLength' looks about right for '50495 balavil-sunset.jpg' so Google Workspace 
+//     MUST BE FILTERING passed blob's...
 function addImg(sheetName, titleVal, img) {
   // 22/9/24 DH: TODO: Dynamically allocate row, col
   let col = 2;

@@ -10,10 +10,12 @@ const routes: Routes = [
 
   {
     // 27/10/24 DH: Integrating 'photoviewer' code
+    
+    // https://angular.dev/guide/routing/common-router-tasks#accessing-query-parameters-and-fragments
     path: 'viewer/:mode/:photoNumber',
+    
     loadChildren: () => import('./viewer/viewer.module').then( m => m.ViewerPageModule)
   }
-    
 
 ];
 
