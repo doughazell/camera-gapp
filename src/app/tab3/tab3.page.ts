@@ -10,7 +10,7 @@ import { EmailComposer } from 'capacitor-email-composer';
 // 7/10/24 DH:
 import { AppscriptService } from '../services/appscript.service';
 
-// 17/10/24 DH:
+// 17/10/24 DH: https://ionicframework.com/docs/angular/platform
 import { Platform } from '@ionic/angular';
 
 // https://capacitorjs.com/docs/apis/app
@@ -32,7 +32,6 @@ var gThis: Tab3Page;
 
 // 31/10/24 DH:
 //var gFileSentFlagSet: Number;
-var gSheetWindow: any;
 
 @Component({
   selector: 'app-tab3',
@@ -48,6 +47,9 @@ export class Tab3Page {
   gdriveImg = "20241010_192026.jpg";
   aiResultImgName = "";
 
+  sheetWindow: any = null;
+  colabWindow: any = null;
+
   imgBase64Src1 = "";
   imgBase64Src2 = "";
   imgBase64Src3 = "";
@@ -56,6 +58,7 @@ export class Tab3Page {
   dtg2 = "";
   dtg3 = "";
   baseTime = 0;
+  output1Label: any = null;
 
   // 8/5/22 DH: Ideally this should be read from the google sheet for DB normalisation (legacy comment from 'selection.component.ts')
   fileList: string[] = [
@@ -155,7 +158,7 @@ export class Tab3Page {
 
   sendFilenameToGScript() {
 
-    //gFileSentFlagSet = 0;
+    this.imgBase64Src3 = "";
 
     fetch(this.appscriptService.url2, { method: "POST", body: this.filename })
       .then((res) => {
@@ -168,8 +171,6 @@ export class Tab3Page {
 
         // 31/10/24 DH: "window.open(sheetURL);" here causes: 'Firefox to prevent opening a "pop-up window"'
         //              LIKEWISE with 'setTimeout()' callback so NEEDS UI THREAD
-        //gFileSentFlagSet = 1;
-        //console.log("gFileSentFlagSet: ", gFileSentFlagSet);
 
         // ------------------------------------------------------
         // 30/10/24 DH: Return screenshot of image inserted sheet
@@ -186,38 +187,24 @@ export class Tab3Page {
         });
         */
 
-        let srcHdrStr = "data:image/png;base64, ";
-        this.imgBase64Src3 = srcHdrStr + base64Img;
+        // 1/11/24 DH: Handle bot-induced error...ffs...!
+        if (base64Img.indexOf("fail") > -1) {
+          // but this time DO NOT OPEN the sheet window
+          this.sendFilenameToGScript();
+        }
+        else {
+          let srcHdrStr = "data:image/png;base64, ";
+          this.imgBase64Src3 = srcHdrStr + base64Img;
+        }
         
       });
     
-    //this.runSheetTimeCycle();
-
-    let sheetURL = "";
-    gSheetWindow = window.open(sheetURL);
-
-  }
-
-  /* ------------------- DEV ---------------------
-     
-  // 31/10/24 DH: Opening 'sheetURL' from callback causes: 'Firefox to prevent opening a "pop-up window"'
-  runSheetTimeCycle() {
+    if (this.sheetWindow == null) { // Only open 1 TAB on the browser OR switch ONCE to sheet App on Mobile
+      this.sheetWindow = window.open(this.appscriptService.sheetURL);
+    }
     
-    if (! gFileSentFlagSet) {
-      console.log("gFileSentFlagSet: ", gFileSentFlagSet);
-
-      setTimeout(() => { 
-        this.runSheetTimeCycle();
-      }, 1000); // arg 2 = msecs
-    }
-    else {
-      console.log("runSheetTimeCycle 'gFileSentFlagSet'");
-      //window.open(sheetURL);
-    }
 
   }
-     ------------------- DEV ---------------------
-  */
 
   // ------------
   // Email image
@@ -314,10 +301,24 @@ export class Tab3Page {
           
           gInitImg = srcHdrStr + base64Img; // Sometimes need to readd 'this.imgBase64Src1' (prob due to non-Atomic sleep/Event sync)
           this.imgBase64Src1 = gInitImg;
+
+          // 1/11/24 DH:
+          if (imgFilename == "topfeatures.png") {
+            this.output1Label = document.getElementById('output1');
+
+            // FROM: "SheetsAPI-Kit::images.html"
+            if (this.output1Label) {
+              this.output1Label.innerHTML = "\
+ORIGINALLY FROM:  <a href=\"https://colab.research.google.com/github/arteagac/arteagac.github.io/blob/master/blog/lime_image.ipynb\">lime_image.ipynb</a>\
+<br>(See <a href=\"https://github.com/doughazell/ai?tab=readme-ov-file#lime-process\">\"LIME process\"</a> for algorithm)";
+            }
+            
+          }
+
         }
       }
 
-      // 17/10/24 DH: TODO: Trigger refresh if Hybrid App (prob with custom Capacitor Plugin "AndroidEvents"), since: 
+      // 17/10/24 DH: Trigger refresh if Hybrid App (prob with custom Capacitor Plugin "AndroidEvents"), since: 
       //             1) 'App.appStateChange' => Post => 'Callback <img> update' NEEDS "Blur/Focus" Event to trigger updating image
       //             2)                         Post => 'Callback <img> update' AUTO UPDATES image
       //             [This works as desired on Webpack Browser AND now works with JUST A TIMER CALLBACK on Android]
@@ -345,7 +346,7 @@ export class Tab3Page {
       this.baseTime = new Date().getTime();
     }
 
-    this.dtg1 = (Math.round( (new Date().getTime() - this.baseTime) / 1000 ).toString()) + " secs";
+    this.dtg3 = (Math.round( (new Date().getTime() - this.baseTime) / 1000 ).toString()) + " secs";
 
     if (gAIResultImgName.indexOf("received") > -1) {
       //this.dtg3 = gAIResultImgName;
@@ -380,6 +381,7 @@ export class Tab3Page {
         this.runTimeCycle();
       }, 500); // arg 2 = msecs
     }
+
     /*
     else {
       // Min 16 "=" to move col to full row
@@ -416,6 +418,11 @@ export class Tab3Page {
     this.imgBase64Src1 = "";
     this.imgBase64Src2 = "";
     gInitImg = "";
+    this.dtg3 = "";
+    // 1/11/24 DH:
+    if(this.output1Label) {
+      this.output1Label.innerHTML = "";
+    }
 
     gReCheckFlag = 0;
     gAIResultImgName = "coefficients.png";
@@ -425,12 +432,25 @@ export class Tab3Page {
     this.baseTime = 0
 
     // -----------------------------------------------------------
-    // FIRST RUN the Python Colab AI
-    window.open(colabURL);
+    // 1) FIRST RUN the Python Colab AI
+    //    (closed in 'this.checkUpdate()' to prevent multiple browser tabs)
+    this.colabWindow = window.open(colabURL);
 
-    // THEN send the result image download request
+    // 2) THEN send the result image download request
     this.getGDriveImg(this.aiResultImgName, 'imgBase64Src2');
     // -----------------------------------------------------------
+
+    /*
+    ===============================================================
+    Angular 18 DOM change/redraw ON NON-UI THREAD UPDATES
+
+      Hybrid:   'appStateChange'
+                  App.addListener()
+      Browser:  'focus'
+                  document.addEventListener()
+
+    ===============================================================
+    */
 
     // "hybrid" will detect Cordova or Capacitor
     if (this.platform.is('hybrid')) { 
@@ -461,7 +481,8 @@ export class Tab3Page {
 
   // 17/10/24 DH: Callback for JS + Capacitor event listeners (NOT WEBVIEW THREAD)
   checkUpdate() {
-    // 17/10/24 DH: 'gAIResultImgName.length' is the flag to recheck the output file
+    // 17/10/24 DH: 'gAIResultImgName.length' is the flag to recheck the output file WITH ONLY 
+    //   ONE EXTRA CALL TO : 'gThis.getGDriveImg(gAIResultImgName, 'imgBase64Src2')'
     if (gReCheckFlag == 0) {
       gReCheckFlag = 1;
 
@@ -472,8 +493,11 @@ export class Tab3Page {
         //App.removeListener('appStateChange');
       }
 
-      console.log("REMOVE FOR DEV: 'checkUpdate()' getting ", gAIResultImgName);
+      // 1/11/24 DH: Close window (ie browser tab) on re-focus to prevent multiple browser tabs
+      //             (https://developer.mozilla.org/en-US/docs/Web/API/Window/close)
+      gThis.colabWindow.close();
 
+      console.log("'checkUpdate()' getting ", gAIResultImgName);
       gThis.getGDriveImg(gAIResultImgName, 'imgBase64Src2');
 
     }

@@ -35,7 +35,7 @@ export class PhotoviewerComponent implements AfterViewInit {
     this.platform = Capacitor.getPlatform();
     this.pvPlugin = PhotoViewer;
     console.log("PhotoviewerComponent.constructor() this.pvPlugin: ", this.pvPlugin);
-   }
+  }
 
   async ngAfterViewInit() {
     const show = async (imageList: Image[], mode: string,
@@ -65,6 +65,8 @@ export class PhotoviewerComponent implements AfterViewInit {
           return Promise.reject(err.message);
       }
     };
+    // END: show = async (...): Promise<capShowResult>
+
     const showToast = async (message: string) => {
       await Toast.show({
           text: message,
