@@ -42,4 +42,7 @@
       <!-- 19/8/24 DH: -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 11/7/26 DH: Upgrade to S22 requirement for PhotoviewerComponent -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
 </manifest>

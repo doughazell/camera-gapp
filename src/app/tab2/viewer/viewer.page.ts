@@ -20,6 +20,8 @@ import { PhotoService, UserPhoto } from '../../services/photo.service';
 
   // 25/10/24 DH:
   //templateUrl: 'viewer.page.html',
+
+  // 9/6/25 DH: https://v17.angular.io/guide/inputs-outputs#configuring-the-parent-component
   template: '<div id="photo-container"><app-photoviewer (pvExit)="handleExit($event)" [imageList]="imageList" [mode]="mode" [startFrom]="startFrom"></app-photoviewer></div>',
   
   styleUrls: ['viewer.page.scss'],
@@ -109,7 +111,9 @@ export class ViewerPage  implements OnInit{
       // 28/10/24 DH: AppscriptService.emailImg(...):
       //   eg: file:///storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20241007_164309_575320056677864398.jpg"
 
-      this.imageList.push({url: 'http://localhost/_capacitor_file_/storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20240930_201510_2468843838468358168.jpg', title: 'Me on Android'});
+      // 11/7/26 DH: Access pictures Ionic stores from the camera directly not seen in Gallery::Camera (dev legacy)
+      //             (S22/Android 16 no longer allows access to 'Android/data' from My Files that was available on S8/Android 9)
+      //this.imageList.push({url: 'http://localhost/_capacitor_file_/storage/emulated/0/Android/data/io.ionic.starter/files/Pictures/JPEG_20240930_201510_2468843838468358168.jpg', title: 'Me on Android'});
       
       // 29/10/24 DH: Need Android App permission for storage: Android_Settings_Apps_"camera-gapp"_Permissions_Storage
       this.imageList.push({url: 'capacitor://localhost/_capacitor_file_/storage/emulated/0/WhatsApp/Media/WhatsApp Images/IMG-20241028-WA0001.jpg', title: 'Bradyman\'s Armada Dish '});

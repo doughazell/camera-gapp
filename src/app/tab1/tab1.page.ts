@@ -114,6 +114,7 @@ export class Tab1Page {
   // ---------------
 
   // 25/9/24 DH: Recreating 'gsheet.js' + 'Node.js::googleapis'
+  // 9/7/26 DH: Lost Google Apps connection in Tab1 + Tab3 which turned out to be Google Apps Scripts not running + needed re-deploy
   getDetails(sheetName: string) {
     let retVal: Observable<any>;
     let params = new HttpParams().set('sheetName', sheetName);

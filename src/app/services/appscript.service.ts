@@ -18,9 +18,14 @@ export class AppscriptService {
   // -------------------------------------------------------
   // *** NOTE: REMOVE ACTIVE URL BEFORE ADDING TO GITHUB ***
   // -------------------------------------------------------
+  // 9/7/26 DH: Previously working Apps Scripts had stopped working when checked on
+  //            https://script.google.com/home/projects/1Duo91M6iNXw8PG7BXA1Tbw96742WUL3qtjTsSIjXbSbVq5vjfvBpwXGI/executions
+  //            Needed to redeploy
   public url1 = '';
 
   public url2 = '';
+
+  public sheetURL = "https://docs.google.com/spreadsheets/d/11tdSmNDpvY1ATQLZvHXmJ2yi_44a94EwzUmTUUkRg1s/edit?gid=1012188693#gid=1012188693";
 
   constructor(private http: HttpClient) { }
 

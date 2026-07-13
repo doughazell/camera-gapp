@@ -2,6 +2,7 @@ import { Component, AfterViewInit, Input, Output, EventEmitter } from '@angular/
 import { PhotoViewer, Image, ViewerOptions, capShowOptions, capShowResult} from '@capacitor-community/photoviewer';
 import { Capacitor } from '@capacitor/core';
 import { Toast } from '@capacitor/toast';
+import { max } from 'rxjs';
 
 @Component({
   selector: 'app-photoviewer',
@@ -21,6 +22,8 @@ export class PhotoviewerComponent implements AfterViewInit {
   // https://angular.dev/api/core/Input 
   // "Decorator that marks a class field as an input property...The input property is bound to a DOM property in the template. During change detection, 
   //  Angular automatically updates the data property with the DOM property's value."
+
+  // 9/6/25 DH: https://angular.dev/guide/components/inputs#declaring-inputs-with-the-input-decorator
   @Input() imageList: Image[] = [];
   @Input() mode = '';
   @Input() startFrom = 0;
@@ -59,20 +62,59 @@ export class PhotoviewerComponent implements AfterViewInit {
               return Promise.reject(ret.message);
           }
       } catch (err: any) {
+          // 11/7/26 DH: https://github.com/capacitor-community/photoviewer/blob/main/src/definitions.ts#L66
           const ret: capShowResult = {} as capShowResult;
           ret.result = false;
-          ret.message = err.message;
-          return Promise.reject(err.message);
+
+          // 11/7/26 DH: Removing newline chars in message as part of Toast debug
+          //             Turned out Android was truncating messages over 50 chars with "..."
+          ret.message = err.message.replace(/\n|\r/g, "");
+
+          // 10/7/26 DH: Debugging PhotoViewer permissions error after upgrade to S22
+          console.log("PhtotoviewerComponent.ngAfterViewInit.show ret.message:", ret.message);
+
+          // Orig Promise.reject message (ie NOT USING capShowResult which is NOT REQUIRED for 'Promise.reject(msg)' )
+          //return Promise.reject(err.message);
+
+          // 11/7/26 DH: Android toast truncates newline chars with "..." so removed above with 'replace()'
+          return Promise.reject(ret.message);
+
       }
     };
     // END: show = async (...): Promise<capShowResult>
 
     const showToast = async (message: string) => {
-      await Toast.show({
+      // 11/7/26 DH: On android results in: https://developer.android.com/guide/topics/ui/notifiers/toasts
+      console.log("PhtotoviewerComponent.ngAfterViewInit.showToast message len:", message.length);
+
+      // 50 chars max text on smartphone so need to cycle longer messages (even in landscape view)
+      const maxSegment = 50;
+
+      if (message.length > maxSegment){
+        let index = 0;
+        let msgPart = "";
+        while (index < message.length) {
+          msgPart = message.substring(index, index + maxSegment);
+          console.log("PhtotoviewerComponent.ngAfterViewInit.showToast message part:", msgPart);
+
+          await Toast.show({
+            text: msgPart,
+            position: 'center',
+            duration: 'long'
+          });
+          index += maxSegment;
+        }
+
+      }
+      else {
+        await Toast.show({
           text: message,
           position: 'center',
           duration: 'long'
-      });
+        });
+      }
+
+
     };
 
     const echo = await this.pvPlugin.echo({value:'Hello from PhotoViewer'});
@@ -108,16 +150,19 @@ export class PhotoviewerComponent implements AfterViewInit {
         //ret = await show(base64List, options);
         
         if(!result.result) {
+            console.log("PhotoviewerComponent.ngAfterViewInit.try Promise no result");
             await showToast(result.message);
             this.pvExit.emit({result: result.result, message: result.message});
         }
         if(result.result && Object.keys(result).includes('message')) {
+            console.log("PhotoviewerComponent.ngAfterViewInit.try Promise result contains message");
             await showToast(result.message);
             this.pvExit.emit({result: result.result, message: result.message});
           }
 
       }
     } catch (err: any) {
+        console.log("PhotoviewerComponent.ngAfterViewInit.catch");
         await showToast(err);
         this.pvExit.emit({result: false, message: err});
     }
