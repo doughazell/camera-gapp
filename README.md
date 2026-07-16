@@ -3,6 +3,14 @@
 ## Apps Script
 Interfaces with Google Workspace via Apps Script (with "google_*" files in [Tab3](https://github.com/doughazell/camera-gapp/tree/master/src/app/tab3))
 
+#### URL removal check
+'~/.githooks/pre-commit' has been added to check that the Google Apps Script url's have been removed prior to pushing to GitHub
+
+The '~/.githooks' directory has been added since '~/.git' does not get pushed to GitHub but it does require the following global git config command:
+```
+$ git config --global core.hooksPath .githooks
+```
+
 #### Running Python AI on Colab
 [Tab3Page.getColabService()](https://github.com/doughazell/camera-gapp/blob/master/src/app/tab3/tab3.page.ts#L317) shows how AI ( currently ['lime.py::runLimeAnalysis()'](https://github.com/doughazell/ai/blob/main/lime.py#L489) ) can be run from Angular via GDrive deposited image result files.
 

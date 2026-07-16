@@ -18,8 +18,7 @@ export class AppscriptService {
   // -------------------------------------------------------
   // *** NOTE: REMOVE ACTIVE URL BEFORE ADDING TO GITHUB ***
   // -------------------------------------------------------
-  // 9/7/26 DH: Previously working Apps Scripts had stopped working when checked on
-  //            https://script.google.com/home/projects/1Duo91M6iNXw8PG7BXA1Tbw96742WUL3qtjTsSIjXbSbVq5vjfvBpwXGI/executions
+  // 9/7/26 DH: Previously working Apps Scripts had stopped working when checked with Google Apps Scripts project executions
   //            Needed to redeploy
   public url1 = '';
 
